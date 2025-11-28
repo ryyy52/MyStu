@@ -102,7 +102,30 @@ public interface ProductService {
      * @return 商品总数
      */
     int countByCategoryId(Integer categoryId);
-
+    
+    /**
+     * 根据分类ID列表查询商品
+     * @param categoryIds 分类ID列表
+     * @return 商品列表
+     */
+    List<Product> findByCategoryIds(List<Integer> categoryIds);
+    
+    /**
+     * 根据分类ID列表分页查询商品
+     * @param categoryIds 分类ID列表
+     * @param page 页码（从1开始）
+     * @param pageSize 每页数量
+     * @return 商品列表
+     */
+    List<Product> findByCategoryIdsAndPage(List<Integer> categoryIds, int page, int pageSize);
+    
+    /**
+     * 根据分类ID列表获取商品总数
+     * @param categoryIds 分类ID列表
+     * @return 商品总数
+     */
+    int countByCategoryIds(List<Integer> categoryIds);
+    
     /**
      * 搜索商品总数
      * @param keyword 搜索关键词

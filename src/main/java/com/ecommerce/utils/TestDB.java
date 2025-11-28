@@ -1,4 +1,4 @@
-package com.ecommerce;
+package com.ecommerce.utils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,7 +7,7 @@ import java.sql.Statement;
 /**
  * 数据库连接测试类
  */
-public class TestDBConnection {
+public class TestDB {
     public static void main(String[] args) {
         String hostUrl = "jdbc:mysql://localhost:3306/?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
         String dbUrl = "jdbc:mysql://localhost:3306/ecommerce?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";

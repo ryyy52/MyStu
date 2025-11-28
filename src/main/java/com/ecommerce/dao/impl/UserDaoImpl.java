@@ -14,11 +14,11 @@ import java.util.Date;
  * 用户数据访问实现类
  */
 public class UserDaoImpl implements UserDao {
-    private static final String FIND_BY_ID = "SELECT id, username, password, email, phone, address, status, create_time, update_time FROM user WHERE id = ?";
-    private static final String FIND_BY_USERNAME = "SELECT id, username, password, email, phone, address, status, create_time, update_time FROM user WHERE username = ?";
-    private static final String FIND_BY_EMAIL = "SELECT id, username, password, email, phone, address, status, create_time, update_time FROM user WHERE email = ?";
-    private static final String SAVE = "INSERT INTO user (username, password, email, phone, address, status, create_time, update_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String UPDATE = "UPDATE user SET username = ?, password = ?, email = ?, phone = ?, address = ?, status = ?, update_time = ? WHERE id = ?";
+    private static final String FIND_BY_ID = "SELECT id, username, password, email, phone, address, status, role, create_time, update_time FROM user WHERE id = ?";
+    private static final String FIND_BY_USERNAME = "SELECT id, username, password, email, phone, address, status, role, create_time, update_time FROM user WHERE username = ?";
+    private static final String FIND_BY_EMAIL = "SELECT id, username, password, email, phone, address, status, role, create_time, update_time FROM user WHERE email = ?";
+    private static final String SAVE = "INSERT INTO user (username, password, email, phone, address, status, role, create_time, update_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE = "UPDATE user SET username = ?, password = ?, email = ?, phone = ?, address = ?, status = ?, role = ?, update_time = ? WHERE id = ?";
     private static final String DELETE = "DELETE FROM user WHERE id = ?";
 
     @Override
@@ -41,6 +41,7 @@ public class UserDaoImpl implements UserDao {
                 user.setPhone(rs.getString("phone"));
                 user.setAddress(rs.getString("address"));
                 user.setStatus(rs.getInt("status"));
+                user.setRole(rs.getString("role"));
                 user.setCreateTime(rs.getTimestamp("create_time"));
                 user.setUpdateTime(rs.getTimestamp("update_time"));
             }
@@ -66,9 +67,7 @@ public class UserDaoImpl implements UserDao {
             ps.setString(1, username);
             System.out.println("DEBUG UserDaoImpl: Executing query: " + FIND_BY_USERNAME);
             rs = ps.executeQuery();
-            boolean hasResult = rs.next();
-            System.out.println("DEBUG UserDaoImpl: Query executed, has results: " + hasResult);
-            if (hasResult) {
+            if (rs.next()) {
                 user = new User();
                 user.setId(rs.getInt("id"));
                 user.setUsername(rs.getString("username"));
@@ -77,9 +76,10 @@ public class UserDaoImpl implements UserDao {
                 user.setPhone(rs.getString("phone"));
                 user.setAddress(rs.getString("address"));
                 user.setStatus(rs.getInt("status"));
+                user.setRole(rs.getString("role"));
                 user.setCreateTime(rs.getTimestamp("create_time"));
                 user.setUpdateTime(rs.getTimestamp("update_time"));
-                System.out.println("DEBUG UserDaoImpl: User found - ID: " + user.getId() + ", Username: " + user.getUsername() + ", Status: " + user.getStatus());
+                System.out.println("DEBUG UserDaoImpl: User found - ID: " + user.getId() + ", Username: " + user.getUsername() + ", Status: " + user.getStatus() + ", Role: " + user.getRole());
             } else {
                 System.out.println("DEBUG UserDaoImpl: No user found for username: " + username);
             }
@@ -112,6 +112,7 @@ public class UserDaoImpl implements UserDao {
                 user.setPhone(rs.getString("phone"));
                 user.setAddress(rs.getString("address"));
                 user.setStatus(rs.getInt("status"));
+                user.setRole(rs.getString("role"));
                 user.setCreateTime(rs.getTimestamp("create_time"));
                 user.setUpdateTime(rs.getTimestamp("update_time"));
             }
@@ -137,8 +138,9 @@ public class UserDaoImpl implements UserDao {
             ps.setString(4, user.getPhone());
             ps.setString(5, user.getAddress());
             ps.setInt(6, user.getStatus());
-            ps.setTimestamp(7, new java.sql.Timestamp(System.currentTimeMillis()));
+            ps.setString(7, user.getRole() != null ? user.getRole() : "user");
             ps.setTimestamp(8, new java.sql.Timestamp(System.currentTimeMillis()));
+            ps.setTimestamp(9, new java.sql.Timestamp(System.currentTimeMillis()));
             result = ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -162,8 +164,9 @@ public class UserDaoImpl implements UserDao {
             ps.setString(4, user.getPhone());
             ps.setString(5, user.getAddress());
             ps.setInt(6, user.getStatus());
-            ps.setTimestamp(7, new java.sql.Timestamp(System.currentTimeMillis()));
-            ps.setInt(8, user.getId());
+            ps.setString(7, user.getRole() != null ? user.getRole() : "user");
+            ps.setTimestamp(8, new java.sql.Timestamp(System.currentTimeMillis()));
+            ps.setInt(9, user.getId());
             result = ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

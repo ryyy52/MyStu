@@ -45,6 +45,8 @@ public class UserServiceImpl implements UserService {
 
         // 设置默认状态为1（正常）
         user.setStatus(1);
+        // 设置默认角色为user
+        user.setRole("user");
         
         // 对密码进行MD5加密
         String encryptedPassword = MD5Utils.encrypt(user.getPassword());
@@ -68,11 +70,20 @@ public class UserServiceImpl implements UserService {
 
         // 对密码进行MD5加密后比较
         String encryptedPassword = MD5Utils.encrypt(password);
+        System.out.println("DEBUG UserServiceImpl: Input password: " + password);
         System.out.println("DEBUG UserServiceImpl: Input password encrypted: " + encryptedPassword);
         System.out.println("DEBUG UserServiceImpl: Stored password: " + user.getPassword());
         System.out.println("DEBUG UserServiceImpl: Password match result: " + Objects.equals(user.getPassword(), encryptedPassword));
         
-        if (Objects.equals(user.getPassword(), encryptedPassword)) {
+        // 尝试使用不同的加密方式进行比较
+        String encryptedPasswordUpperCase = encryptedPassword.toUpperCase();
+        System.out.println("DEBUG UserServiceImpl: Input password encrypted (uppercase): " + encryptedPasswordUpperCase);
+        System.out.println("DEBUG UserServiceImpl: Password match result (uppercase): " + Objects.equals(user.getPassword(), encryptedPasswordUpperCase));
+        
+        // 直接比较原始密码（用于调试）
+        System.out.println("DEBUG UserServiceImpl: Direct password match: " + Objects.equals(user.getPassword(), password));
+        
+        if (Objects.equals(user.getPassword(), encryptedPassword) || Objects.equals(user.getPassword(), encryptedPasswordUpperCase)) {
             System.out.println("DEBUG UserServiceImpl: Login successful for user: " + username);
             return user;
         }

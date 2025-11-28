@@ -14,6 +14,7 @@ public class User implements Serializable {
     private String phone; // 手机号
     private String address; // 地址
     private Integer status; // 状态（0：禁用，1：启用）
+    private String role; // 角色（admin：管理员，user：普通用户）
     private Date createTime; // 创建时间
     private Date updateTime; // 更新时间
 
@@ -100,6 +101,14 @@ public class User implements Serializable {
         this.status = status;
     }
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -110,6 +119,7 @@ public class User implements Serializable {
                 ", phone='" + phone + '\'' +
                 ", address='" + address + '\'' +
                 ", status=" + status +
+                ", role='" + role + '\'' +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 '}';

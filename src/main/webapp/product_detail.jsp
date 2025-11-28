@@ -28,9 +28,20 @@
         }
         .product-image {
             width: 400px;
-            height: 400px;
             background-color: #f9f9f9;
             border-radius: 5px;
+            display: block;
+            text-align: center;
+            padding: 10px;
+            overflow: visible;
+        }
+        .product-image img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: none;
+            display: inline-block;
+            vertical-align: middle;
         }
         .product-info {
             flex: 1;
@@ -82,13 +93,23 @@
         <h1>商品详情</h1>
         
         <div class="product-detail">
-            <div class="product-image">
+            <div class="product-image" style="display:flex;justify-content:center;align-items:center;background-color:#f9f9f9;border-radius:5px;overflow:hidden;">
                 <c:choose>
-                    <c:when test="${fn:startsWith(product.image,'http')}">
-                        <img src="${product.image}" alt="图片" style="width:100%;height:100%;object-fit:cover;border-radius:5px;" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'" />
+                    <c:when test="${not empty product.image}">
+                        <c:choose>
+                            <c:when test="${fn:startsWith(product.image,'http')}">
+                                <img src="${product.image}" alt="图片" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'" />
+                            </c:when>
+                            <c:when test="${fn:startsWith(product.image,'/')}">
+                                <img src="${pageContext.request.contextPath}${product.image}" alt="图片" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'" />
+                            </c:when>
+                            <c:otherwise>
+                                <img src="${pageContext.request.contextPath}/images/${product.image}" alt="图片" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'" />
+                            </c:otherwise>
+                        </c:choose>
                     </c:when>
                     <c:otherwise>
-                        <img src="${pageContext.request.contextPath}${product.image}" alt="图片" style="width:100%;height:100%;object-fit:cover;border-radius:5px;" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'" />
+                        <img src="https://via.placeholder.com/400x400?text=No+Image" alt="图片" style="width:100%;height:100%;object-fit:cover;" />
                     </c:otherwise>
                 </c:choose>
             </div>
@@ -97,7 +118,7 @@
                 <div class="product-price">¥ ${product.price}</div>
                 <div class="product-description">${product.description}</div>
                 <div class="product-stock">库存：${product.stock}</div>
-                <div class="product-category">分类：${product.categoryId}</div>
+                <div class="product-category">分类ID：${product.categoryId}</div>
                 <div>
                     <a href="${pageContext.request.contextPath}/product/list" class="btn">返回列表</a>
                     <a href="${pageContext.request.contextPath}/cart/add?productId=${product.id}&quantity=1" class="btn btn-primary">加入购物车</a>

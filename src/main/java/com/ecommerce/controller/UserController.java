@@ -188,6 +188,8 @@ public class UserController extends HttpServlet {
             if (user != null) {
                 // 保存用户信息到会话
                 session.setAttribute("user", user);
+                // 添加调试信息
+                System.out.println("DEBUG UserController.login: User saved to session - ID: " + user.getId() + ", Username: " + user.getUsername() + ", Role: " + user.getRole());
                 // 记住我
                 String remember = request.getParameter("rememberMe");
                 if ("on".equalsIgnoreCase(remember)) {

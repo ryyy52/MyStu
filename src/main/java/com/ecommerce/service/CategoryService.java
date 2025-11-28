@@ -54,4 +54,11 @@ public interface CategoryService {
      * @return 删除是否成功
      */
     boolean delete(Integer id);
+    
+    /**
+     * 获取分类及其所有子分类的ID列表
+     * @param categoryId 分类ID
+     * @return 分类ID列表
+     */
+    List<Integer> getCategoryIdsWithChildren(Integer categoryId);
 }

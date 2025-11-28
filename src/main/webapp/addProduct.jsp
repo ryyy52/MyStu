@@ -61,7 +61,7 @@
             </div>
             <div class="form-row">
                 <label>图片URL</label>
-                <input type="text" name="image" placeholder="例如 /images/xxx.jpg" />
+                <input type="text" name="image" placeholder="例如 https://example.com/image.jpg 或 /images/xxx.jpg" />
             </div>
             <div class="form-row">
                 <label>商品描述</label>

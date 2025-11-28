@@ -56,6 +56,9 @@ public class CategoryController extends HttpServlet {
                 case "delete":
                     deleteCategory(request, response);
                     break;
+                case "edit":
+                    editCategory(request, response);
+                    break;
                 default:
                     out.println("无效的请求");
             }
@@ -71,7 +74,7 @@ public class CategoryController extends HttpServlet {
      * 获取分类列表
      */
     private void listCategories(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Category> categories = categoryService.findAll();
+        List<Category> categoryTree = categoryService.getCategoryTree();
         PrintWriter out = response.getWriter();
 
         out.println("<html lang='zh-CN'>");
@@ -87,22 +90,42 @@ public class CategoryController extends HttpServlet {
         out.println("<table>");
         out.println("<tr><th>ID</th><th>分类名称</th><th>父分类ID</th><th>操作</th></tr>");
 
+        // 递归打印分类树
+        printCategoryList(categoryTree, out, 0, request);
+
+        out.println("</table>");
+        out.println("</div>");
+        out.println("</body>");
+        out.println("</html>");
+    }
+    
+    /**
+     * 递归打印分类列表，显示层级结构
+     */
+    private void printCategoryList(List<Category> categories, PrintWriter out, int level, HttpServletRequest request) {
         for (Category category : categories) {
+            // 根据层级添加缩进
+            String indent = "";
+            for (int i = 0; i < level; i++) {
+                indent += "&nbsp;&nbsp;&nbsp;&nbsp;";
+            }
+            
+            // 打印分类行
             out.println("<tr>");
             out.println("<td>" + category.getId() + "</td>");
-            out.println("<td>" + category.getName() + "</td>");
+            out.println("<td>" + indent + category.getName() + "</td>");
             out.println("<td>" + category.getParentId() + "</td>");
             out.println("<td class='ops'>");
             out.println("<a href='" + request.getContextPath() + "/category/edit?id=" + category.getId() + "'>编辑</a>");
             out.println("<a href='" + request.getContextPath() + "/category/delete?id=" + category.getId() + "' onclick='return confirm(\"确定要删除吗？\")'>删除</a>");
             out.println("</td>");
             out.println("</tr>");
+            
+            // 递归打印子分类
+            if (category.getChildren() != null && !category.getChildren().isEmpty()) {
+                printCategoryList(category.getChildren(), out, level + 1, request);
+            }
         }
-
-        out.println("</table>");
-        out.println("</div>");
-        out.println("</body>");
-        out.println("</html>");
     }
 
     /**
@@ -247,6 +270,56 @@ public class CategoryController extends HttpServlet {
             }
         } else {
             out.println("分类不存在！<a href='list'>返回列表</a>");
+        }
+    }
+
+    /**
+     * 编辑分类
+     */
+    private void editCategory(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String idStr = request.getParameter("id");
+        if (idStr != null && !idStr.isEmpty()) {
+            int categoryId = Integer.parseInt(idStr);
+            Category category = categoryService.findById(categoryId);
+            PrintWriter out = response.getWriter();
+
+            if (category != null) {
+                // 渲染编辑页面
+                out.println("<html lang='zh-CN'>");
+                out.println("<head>");
+                out.println("<meta charset='UTF-8'>");
+                out.println("<title>编辑分类</title>");
+                out.println("<style>body{font-family:Arial,sans-serif;margin:0;padding:0;background:#f2f2f2}.container{width:60%;margin:20px auto;background:#fff;padding:20px;box-shadow:0 0 10px rgba(0,0,0,0.1)}h1{color:#333;margin:0 0 20px}.form-group{margin-bottom:15px}label{display:block;margin-bottom:5px}input,select,textarea{width:100%;padding:8px;box-sizing:border-box;border:1px solid #ddd;border-radius:3px}.btn{padding:8px 12px;background:#3498db;color:#fff;border:none;border-radius:3px;cursor:pointer}.btn:hover{background:#2980b9}</style>");
+                out.println("</head>");
+                out.println("<body>");
+                out.println("<div class='container'>");
+                out.println("<h1>编辑分类</h1>");
+                out.println("<form action='" + request.getContextPath() + "/category/update' method='post'>");
+                out.println("<input type='hidden' name='id' value='" + category.getId() + "'>");
+                out.println("<div class='form-group'><label for='name'>分类名称：</label><input type='text' id='name' name='name' value='" + category.getName() + "' required></div>");
+                out.println("<div class='form-group'><label for='parentId'>父分类：</label><select id='parentId' name='parentId'><option value='0'>顶级分类</option>");
+                // 获取所有分类，用于父分类选择
+                List<Category> allCategories = categoryService.findAll();
+                for (Category cat : allCategories) {
+                    if (cat.getId() != category.getId()) { // 排除自身
+                        String selected = cat.getId().equals(category.getParentId()) ? "selected" : "";
+                        out.println("<option value='" + cat.getId() + "' " + selected + ">" + cat.getName() + "</option>");
+                    }
+                }
+                out.println("</select></div>");
+                out.println("<div class='form-group'><label for='sort'>排序：</label><input type='number' id='sort' name='sort' value='" + (category.getSort() != null ? category.getSort() : 0) + "'></div>");
+                out.println("<div class='form-group'><label for='icon'>图标：</label><input type='text' id='icon' name='icon' value='" + (category.getIcon() != null ? category.getIcon() : "") + "'></div>");
+                out.println("<div class='form-group'><label for='description'>描述：</label><textarea id='description' name='description' rows='3'>" + (category.getDescription() != null ? category.getDescription() : "") + "</textarea></div>");
+                out.println("<div class='form-group'><input type='submit' class='btn' value='保存修改'> <a href='" + request.getContextPath() + "/category/list' class='btn' style='background:#95a5a6'>返回列表</a></div>");
+                out.println("</form>");
+                out.println("</div>");
+                out.println("</body>");
+                out.println("</html>");
+            } else {
+                out.println("分类不存在！<a href='" + request.getContextPath() + "/category/list'>返回列表</a>");
+            }
+        } else {
+            response.getWriter().println("无效的分类ID！<a href='" + request.getContextPath() + "/category/list'>返回列表</a>");
         }
     }
 

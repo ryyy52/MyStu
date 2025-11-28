@@ -87,4 +87,28 @@ public class CategoryServiceImpl implements CategoryService {
         int result = categoryDao.delete(id);
         return result > 0;
     }
+    
+    @Override
+    public List<Integer> getCategoryIdsWithChildren(Integer categoryId) {
+        List<Integer> categoryIds = new ArrayList<>();
+        // 添加当前分类ID
+        categoryIds.add(categoryId);
+        // 递归添加所有子分类ID
+        addChildrenIds(categoryId, categoryIds);
+        return categoryIds;
+    }
+    
+    /**
+     * 递归添加所有子分类ID
+     * @param parentId 父分类ID
+     * @param categoryIds 分类ID列表
+     */
+    private void addChildrenIds(Integer parentId, List<Integer> categoryIds) {
+        List<Category> children = categoryDao.findByParentId(parentId);
+        for (Category child : children) {
+            categoryIds.add(child.getId());
+            // 递归添加子分类的子分类
+            addChildrenIds(child.getId(), categoryIds);
+        }
+    }
 }

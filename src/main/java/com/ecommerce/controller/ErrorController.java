@@ -23,15 +23,25 @@ public class ErrorController extends HttpServlet {
     }
     
     private void handleError(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // 设置响应编码
+        response.setContentType("text/html;charset=UTF-8");
+        request.setCharacterEncoding("UTF-8");
+        
         // 获取错误代码
         Integer errorCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
         String errorMessage = (String) request.getAttribute("javax.servlet.error.message");
         Throwable throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
         String requestUri = (String) request.getAttribute("javax.servlet.error.request_uri");
         
+        // 获取URL参数中的message
+        String urlMessage = request.getParameter("message");
+        if (urlMessage != null && !urlMessage.isEmpty()) {
+            errorMessage = urlMessage;
+        }
+        
         // 设置默认错误代码
         if (errorCode == null) {
-            errorCode = 500;
+            errorCode = 403; // 默认权限错误
         }
         
         // 设置错误信息

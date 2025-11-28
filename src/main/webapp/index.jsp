@@ -28,7 +28,9 @@
     <div class="nav">
         <a href="${pageContext.request.contextPath}/index.jsp">首页</a>
         <a href="${pageContext.request.contextPath}/product/list">商品列表</a>
-        <a href="${pageContext.request.contextPath}/category/list">分类管理</a>
+        <c:if test="${not empty user and user.role == 'admin'}">
+            <a href="${pageContext.request.contextPath}/category/list">分类管理</a>
+        </c:if>
         <div class="nav-right">
             <a href="${pageContext.request.contextPath}/cart/view">购物车</a>
             <a href="${pageContext.request.contextPath}/order/list">我的订单</a>
@@ -45,7 +47,9 @@
                     <input type="text" name="keyword" placeholder="搜索商品...">
                     <button type="submit">搜索</button>
                 </form>
-                <a href="${pageContext.request.contextPath}/product/add" class="btn">添加商品</a>
+                <c:if test="${not empty user and user.role == 'admin'}">
+                    <a href="${pageContext.request.contextPath}/product/add" class="btn">添加商品</a>
+                </c:if>
             </div>
         </div>
         <div class="intro">

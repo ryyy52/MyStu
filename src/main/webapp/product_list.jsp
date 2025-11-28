@@ -125,7 +125,7 @@
     <div class="container">
         <h1>商品列表</h1>
         <div class="toolbar">
-            <a href="${pageContext.request.contextPath}/addProduct.jsp" class="btn">添加商品</a>
+            <a href="${pageContext.request.contextPath}/product/add" class="btn">添加商品</a>
         </div>
         
         <!-- 搜索表单 -->
@@ -190,6 +190,7 @@
                     <div class="product-stock">库存：${product.stock}</div>
                     <a href="${pageContext.request.contextPath}/product/detail?id=${product.id}" class="btn">查看详情</a>
                     <a href="${pageContext.request.contextPath}/cart/add?productId=${product.id}&quantity=1" class="btn">加入购物车</a>
+                    <a href="javascript:void(0)" onclick="if(confirm('确定要删除该商品吗？')) window.location.href='${pageContext.request.contextPath}/product/delete?id=${product.id}'" class="btn" style="background-color: #e74c3c;">删除商品</a>
                 </div>
             </c:forEach>
         </div>

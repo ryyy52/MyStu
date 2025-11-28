@@ -35,14 +35,34 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public boolean save(Product product) {
+        System.out.println("=== ProductServiceImpl.save() 开始执行 ===");
+        System.out.println("传入的商品对象：");
+        System.out.println("商品名称: " + product.getName());
+        System.out.println("分类ID: " + product.getCategoryId());
+        System.out.println("价格: " + product.getPrice());
+        System.out.println("库存: " + product.getStock());
+        System.out.println("图片URL: " + product.getImage());
+        System.out.println("描述: " + product.getDescription());
+        System.out.println("状态: " + product.getStatus());
+        
         // 设置默认状态为1（上架）
         product.setStatus(1);
+        System.out.println("设置默认状态为1（上架）");
+        
         // 设置默认库存
         if (product.getStock() == null) {
             product.setStock(0);
+            System.out.println("设置默认库存为0");
         }
+        
+        System.out.println("调用productDao.save()");
         int result = productDao.save(product);
-        return result > 0;
+        System.out.println("productDao.save()返回结果: " + result);
+        
+        boolean success = result > 0;
+        System.out.println("ProductServiceImpl.save()返回结果: " + success);
+        System.out.println("=== ProductServiceImpl.save() 执行结束 ===");
+        return success;
     }
 
     @Override
@@ -104,6 +124,31 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public int countByCategoryId(Integer categoryId) {
         return productDao.countByCategoryId(categoryId);
+    }
+
+    /**
+     * 根据分类ID列表查询商品
+     */
+    @Override
+    public List<Product> findByCategoryIds(List<Integer> categoryIds) {
+        return productDao.findByCategoryIds(categoryIds);
+    }
+
+    /**
+     * 根据分类ID列表分页查询商品
+     */
+    @Override
+    public List<Product> findByCategoryIdsAndPage(List<Integer> categoryIds, int page, int pageSize) {
+        int offset = Math.max(0, (page - 1) * pageSize);
+        return productDao.findByCategoryIdsAndPage(categoryIds, offset, pageSize);
+    }
+
+    /**
+     * 根据分类ID列表获取商品总数
+     */
+    @Override
+    public int countByCategoryIds(List<Integer> categoryIds) {
+        return productDao.countByCategoryIds(categoryIds);
     }
 
     /**

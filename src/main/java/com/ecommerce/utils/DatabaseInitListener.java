@@ -2,8 +2,12 @@ package com.ecommerce.utils;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Statement;
 
 public class DatabaseInitListener implements ServletContextListener {
@@ -12,89 +16,50 @@ public class DatabaseInitListener implements ServletContextListener {
         String hostUrl = "jdbc:mysql://localhost:3306/?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
         String dbUrl = "jdbc:mysql://localhost:3306/ecommerce?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
         String username = System.getProperty("db.user", "root");
-        String password = System.getProperty("db.pass", "123456");
+        String password = System.getProperty("db.pass", "liuweifeng233");
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
+            // 创建数据库
             try (Connection conn = DriverManager.getConnection(hostUrl, username, password);
                  Statement st = conn.createStatement()) {
                 st.execute("CREATE DATABASE IF NOT EXISTS ecommerce DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
             }
+            
+            // 检查是否需要初始化数据库
+            boolean needInit = false;
+            
+            // 检查user表是否有记录，如果没有记录则需要初始化
             try (Connection conn = DriverManager.getConnection(dbUrl, username, password);
                  Statement st = conn.createStatement()) {
-                st.execute("CREATE TABLE IF NOT EXISTS user (\n" +
-                        "  id INT AUTO_INCREMENT PRIMARY KEY,\n" +
-                        "  username VARCHAR(64) NOT NULL UNIQUE,\n" +
-                        "  password VARCHAR(128) NOT NULL,\n" +
-                        "  email VARCHAR(128) UNIQUE,\n" +
-                        "  phone VARCHAR(32),\n" +
-                        "  address VARCHAR(255),\n" +
-                        "  status INT DEFAULT 1,\n" +
-                        "  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n" +
-                        "  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\n" +
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-                st.execute("CREATE TABLE IF NOT EXISTS category (\n" +
-                        "  id INT AUTO_INCREMENT PRIMARY KEY,\n" +
-                        "  name VARCHAR(64) NOT NULL,\n" +
-                        "  parent_id INT DEFAULT 0,\n" +
-                        "  level INT DEFAULT 1,\n" +
-                        "  sort INT DEFAULT 0,\n" +
-                        "  icon VARCHAR(255),\n" +
-                        "  description TEXT,\n" +
-                        "  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n" +
-                        "  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\n" +
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-                st.execute("CREATE TABLE IF NOT EXISTS product (\n" +
-                        "  id INT AUTO_INCREMENT PRIMARY KEY,\n" +
-                        "  name VARCHAR(128) NOT NULL,\n" +
-                        "  category_id INT,\n" +
-                        "  price DECIMAL(10,2) DEFAULT 0.00,\n" +
-                        "  stock INT DEFAULT 0,\n" +
-                        "  description TEXT,\n" +
-                        "  image VARCHAR(255),\n" +
-                        "  status INT DEFAULT 1,\n" +
-                        "  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n" +
-                        "  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n" +
-                        "  FOREIGN KEY (category_id) REFERENCES category(id)\n" +
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-                st.execute("CREATE TABLE IF NOT EXISTS cart (\n" +
-                        "  id INT AUTO_INCREMENT PRIMARY KEY,\n" +
-                        "  user_id INT NOT NULL,\n" +
-                        "  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n" +
-                        "  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n" +
-                        "  FOREIGN KEY (user_id) REFERENCES user(id)\n" +
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-                st.execute("CREATE TABLE IF NOT EXISTS cart_item (\n" +
-                        "  id INT AUTO_INCREMENT PRIMARY KEY,\n" +
-                        "  cart_id INT NOT NULL,\n" +
-                        "  product_id INT NOT NULL,\n" +
-                        "  quantity INT NOT NULL DEFAULT 1,\n" +
-                        "  FOREIGN KEY (cart_id) REFERENCES cart(id) ON DELETE CASCADE,\n" +
-                        "  FOREIGN KEY (product_id) REFERENCES product(id)\n" +
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-                st.execute("CREATE TABLE IF NOT EXISTS `order` (\n" +
-                        "  id INT AUTO_INCREMENT PRIMARY KEY,\n" +
-                        "  order_no VARCHAR(64) NOT NULL UNIQUE,\n" +
-                        "  user_id INT NOT NULL,\n" +
-                        "  total_amount DECIMAL(10,2) DEFAULT 0.00,\n" +
-                        "  status INT DEFAULT 0,\n" +
-                        "  receiver_name VARCHAR(64),\n" +
-                        "  receiver_phone VARCHAR(32),\n" +
-                        "  receiver_address VARCHAR(255),\n" +
-                        "  create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n" +
-                        "  update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n" +
-                        "  FOREIGN KEY (user_id) REFERENCES user(id)\n" +
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-                st.execute("CREATE TABLE IF NOT EXISTS order_item (\n" +
-                        "  id INT AUTO_INCREMENT PRIMARY KEY,\n" +
-                        "  order_id INT NOT NULL,\n" +
-                        "  product_id INT NOT NULL,\n" +
-                        "  quantity INT NOT NULL DEFAULT 1,\n" +
-                        "  price DECIMAL(10,2) DEFAULT 0.00,\n" +
-                        "  FOREIGN KEY (order_id) REFERENCES `order`(id) ON DELETE CASCADE,\n" +
-                        "  FOREIGN KEY (product_id) REFERENCES product(id)\n" +
-                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                // 检查表是否存在
+                ResultSet rs = st.executeQuery("SHOW TABLES LIKE 'user'");
+                if (rs.next()) {
+                    // 表存在，检查是否有记录
+                    rs = st.executeQuery("SELECT COUNT(*) FROM user");
+                    if (rs.next() && rs.getInt(1) == 0) {
+                        // 表存在但没有记录，需要初始化
+                        needInit = true;
+                    }
+                } else {
+                    // 表不存在，需要初始化
+                    needInit = true;
+                }
             }
-            System.out.println("数据库初始化完成");
+            
+            // 只有在需要时才执行初始化
+            if (needInit) {
+                // 读取并执行SQL脚本
+                try (Connection conn = DriverManager.getConnection(dbUrl, username, password);
+                     Statement st = conn.createStatement()) {
+                    // 读取SQL脚本文件
+                    String sqlScript = readSqlScript("sql/ecommerce_init.sql");
+                    // 执行SQL脚本
+                    executeSqlScript(st, sqlScript);
+                    System.out.println("数据库初始化完成");
+                }
+            } else {
+                System.out.println("数据库已存在且包含数据，跳过初始化");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -102,5 +67,37 @@ public class DatabaseInitListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+    }
+
+    /**
+     * 读取SQL脚本文件
+     */
+    private static String readSqlScript(String scriptPath) throws Exception {
+        StringBuilder sb = new StringBuilder();
+        try (InputStream is = DatabaseInitListener.class.getClassLoader().getResourceAsStream(scriptPath);
+             BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                // 跳过注释和空行
+                if (!line.trim().startsWith("--") && !line.trim().isEmpty()) {
+                    sb.append(line).append("\n");
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 执行SQL脚本
+     */
+    private static void executeSqlScript(Statement st, String sqlScript) throws Exception {
+        // 分割SQL语句
+        String[] sqlStatements = sqlScript.split(";");
+        for (String sql : sqlStatements) {
+            String trimmedSql = sql.trim();
+            if (!trimmedSql.isEmpty()) {
+                st.execute(trimmedSql);
+            }
+        }
     }
 }

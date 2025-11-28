@@ -78,8 +78,6 @@ public class CartServiceImpl implements CartService {
         cartItem.setProductName(product.getName());
         cartItem.setPrice(product.getPrice());
         cartItem.setQuantity(quantity);
-        // 设置默认sort_order为0
-        cartItem.setSortOrder(0);
         
         return cartDao.saveCartItem(cartItem) > 0;
     }
@@ -100,7 +98,6 @@ public class CartServiceImpl implements CartService {
 
         // 更新商品数量
         cartItem.setQuantity(quantity);
-        // 保持现有的sort_order不变
         return cartDao.updateCartItem(cartItem) > 0;
     }
 

@@ -22,8 +22,7 @@
         <div class="toolbar">
             <a href="${pageContext.request.contextPath}/product/list" class="btn">返回商品列表</a>
         </div>
-        <form id="productForm" action="${pageContext.request.contextPath}/product/add" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
-            <input type="hidden" name="action" value="save" />
+        <form id="productForm" action="${pageContext.request.contextPath}/product/save" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
             <div class="form-row">
                 <label>商品名称</label>
                 <input type="text" name="name" required maxlength="100" />
@@ -33,13 +32,14 @@
                 <select id="categorySelect" name="categoryId" required>
                     <option value="">请选择分类</option>
                     <c:forEach var="category" items="${categoryTree}">
-                        <option value="${category.id}">${category.name}</option>
-                        <c:forEach var="sub" items="${category.children}">
-                            <option value="${sub.id}">├─ ${sub.name}</option>
-                            <c:forEach var="sub2" items="${sub.children}">
-                                <option value="${sub2.id}">└─ ${sub2.name}</option>
+                        <optgroup label="${category.name}">
+                            <c:forEach var="sub" items="${category.children}">
+                                <option value="${sub.id}">${sub.name}</option>
+                                <c:forEach var="sub2" items="${sub.children}">
+                                    <option value="${sub2.id}">· ${sub2.name}</option>
+                                </c:forEach>
                             </c:forEach>
-                        </c:forEach>
+                        </optgroup>
                     </c:forEach>
                 </select>
             </div>
@@ -111,11 +111,11 @@
                                     opt.textContent = sub.name;
                                     group.appendChild(opt);
                                     (sub.children||[]).forEach(function(sub2){
-                                var opt2 = document.createElement('option');
-                                opt2.value = sub2.id;
-                                opt2.textContent = '· ' + sub2.name;
-                                group.appendChild(opt2);
-                            });
+                                        var opt2 = document.createElement('option');
+                                        opt2.value = sub2.id;
+                                        opt2.textContent = '· ' + sub2.name;
+                                        group.appendChild(opt2);
+                                    });
                                 });
                             });
                         })

@@ -57,7 +57,7 @@ public class CategoryController extends HttpServlet {
                     deleteCategory(request, response);
                     break;
                 default:
-                    response.sendRedirect(request.getContextPath() + "/product/list");
+                    out.println("无效的请求");
             }
         } catch (Exception e) {
             e.printStackTrace();

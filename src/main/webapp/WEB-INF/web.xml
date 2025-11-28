@@ -38,11 +38,15 @@
         <servlet-name>ProductController</servlet-name>
         <url-pattern>/product/*</url-pattern>
     </servlet-mapping>
+    <!-- 直接将 /product/add 映射到 JSP 页面，保证路径可用 -->
+    <servlet>
+        <servlet-name>AddProductPage</servlet-name>
+        <jsp-file>/addProduct.jsp</jsp-file>
+    </servlet>
     <servlet-mapping>
-        <servlet-name>ProductController</servlet-name>
-        <url-pattern>/product</url-pattern>
+        <servlet-name>AddProductPage</servlet-name>
+        <url-pattern>/product/add</url-pattern>
     </servlet-mapping>
-    <!-- /product/add 由 ProductController 统一处理（GET 显示添加页，POST 执行保存） -->
     <servlet-mapping>
         <servlet-name>ProductController</servlet-name>
         <url-pattern>/product/save</url-pattern>
@@ -127,5 +131,9 @@
         <filter-name>AuthFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
+    <listener>
+        <listener-class>com.ecommerce.utils.DatabaseInitListener</listener-class>
+    </listener>
 
 </web-app>

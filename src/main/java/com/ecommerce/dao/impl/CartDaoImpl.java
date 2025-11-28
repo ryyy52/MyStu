@@ -23,11 +23,11 @@ public class CartDaoImpl implements CartDao {
     private static final String UPDATE = "UPDATE cart SET update_time = ? WHERE id = ?";
     private static final String DELETE = "DELETE FROM cart WHERE id = ?";
     
-    private static final String FIND_CART_ITEMS_BY_CART_ID = "SELECT id, cart_id, product_id, quantity, sort_order FROM cart_item WHERE cart_id = ? ORDER BY sort_order";
-    private static final String FIND_CART_ITEM_BY_CART_ID_AND_PRODUCT_ID = "SELECT id, cart_id, product_id, quantity, sort_order FROM cart_item WHERE cart_id = ? AND product_id = ?";
-    private static final String FIND_CART_ITEM_BY_ID = "SELECT id, cart_id, product_id, quantity, sort_order FROM cart_item WHERE id = ?";
-    private static final String SAVE_CART_ITEM = "INSERT INTO cart_item (cart_id, product_id, quantity, sort_order) VALUES (?, ?, ?, ?)";
-    private static final String UPDATE_CART_ITEM = "UPDATE cart_item SET quantity = ?, sort_order = ? WHERE id = ?";
+    private static final String FIND_CART_ITEMS_BY_CART_ID = "SELECT id, cart_id, product_id, quantity FROM cart_item WHERE cart_id = ?";
+    private static final String FIND_CART_ITEM_BY_CART_ID_AND_PRODUCT_ID = "SELECT id, cart_id, product_id, quantity FROM cart_item WHERE cart_id = ? AND product_id = ?";
+    private static final String FIND_CART_ITEM_BY_ID = "SELECT id, cart_id, product_id, quantity FROM cart_item WHERE id = ?";
+    private static final String SAVE_CART_ITEM = "INSERT INTO cart_item (cart_id, product_id, quantity) VALUES (?, ?, ?)";
+    private static final String UPDATE_CART_ITEM = "UPDATE cart_item SET quantity = ? WHERE id = ?";
     private static final String DELETE_CART_ITEM = "DELETE FROM cart_item WHERE id = ?";
     private static final String DELETE_CART_ITEMS_BY_CART_ID = "DELETE FROM cart_item WHERE cart_id = ?";
 
@@ -166,7 +166,6 @@ public class CartDaoImpl implements CartDao {
                 cartItem.setCartId(rs.getInt("cart_id"));
                 cartItem.setProductId(rs.getInt("product_id"));
                 cartItem.setQuantity(rs.getInt("quantity"));
-                cartItem.setSortOrder(rs.getInt("sort_order"));
                 // 加载商品信息
                 ProductDaoImpl productDao = new ProductDaoImpl();
                 Product product = productDao.findById(cartItem.getProductId());
@@ -203,7 +202,6 @@ public class CartDaoImpl implements CartDao {
                 cartItem.setCartId(rs.getInt("cart_id"));
                 cartItem.setProductId(rs.getInt("product_id"));
                 cartItem.setQuantity(rs.getInt("quantity"));
-                cartItem.setSortOrder(rs.getInt("sort_order"));
                 // 加载商品信息
                 ProductDaoImpl productDao = new ProductDaoImpl();
                 Product product = productDao.findById(cartItem.getProductId());
@@ -232,8 +230,6 @@ public class CartDaoImpl implements CartDao {
             ps.setInt(1, cartItem.getCartId());
             ps.setInt(2, cartItem.getProductId());
             ps.setInt(3, cartItem.getQuantity());
-            // 使用默认的sort_order值0
-            ps.setInt(4, 0);
             result = ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -252,9 +248,7 @@ public class CartDaoImpl implements CartDao {
             conn = JDBCUtils.getConnection();
             ps = conn.prepareStatement(UPDATE_CART_ITEM);
             ps.setInt(1, cartItem.getQuantity());
-            // 使用默认的sort_order值0
-            ps.setInt(2, 0);
-            ps.setInt(3, cartItem.getId());
+            ps.setInt(2, cartItem.getId());
             result = ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -317,7 +311,6 @@ public class CartDaoImpl implements CartDao {
                 cartItem.setCartId(rs.getInt("cart_id"));
                 cartItem.setProductId(rs.getInt("product_id"));
                 cartItem.setQuantity(rs.getInt("quantity"));
-                cartItem.setSortOrder(rs.getInt("sort_order"));
                 // 加载商品信息
                 ProductDaoImpl productDao = new ProductDaoImpl();
                 Product product = productDao.findById(cartItem.getProductId());

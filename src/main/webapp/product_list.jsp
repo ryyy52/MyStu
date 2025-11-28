@@ -125,7 +125,7 @@
     <div class="container">
         <h1>商品列表</h1>
         <div class="toolbar">
-            <a href="${pageContext.request.contextPath}/product/add" class="btn">添加商品</a>
+            <a href="${pageContext.request.contextPath}/addProduct.jsp" class="btn">添加商品</a>
         </div>
         
         <!-- 搜索表单 -->

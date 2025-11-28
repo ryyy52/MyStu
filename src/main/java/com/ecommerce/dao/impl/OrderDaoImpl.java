@@ -149,7 +149,7 @@ public class OrderDaoImpl implements OrderDao {
                 order.setId(rs.getInt("id"));
                 order.setOrderNo(rs.getString("order_no"));
                 order.setUserId(rs.getInt("user_id"));
-                order.setTotalPrice(rs.getBigDecimal("total_price"));
+                order.setTotalPrice(rs.getBigDecimal("total_amount"));
                 order.setStatus(rs.getInt("status"));
                 order.setReceiverName(rs.getString("receiver_name"));
                 order.setReceiverPhone(rs.getString("receiver_phone"));

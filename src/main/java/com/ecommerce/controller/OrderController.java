@@ -50,7 +50,7 @@ public class OrderController extends HttpServlet {
                     orderDetail(request, response);
                     break;
                 default:
-                    response.sendRedirect(request.getContextPath() + "/order/list");
+                    out.println("无效的请求");
             }
         } catch (Exception e) {
             e.printStackTrace();

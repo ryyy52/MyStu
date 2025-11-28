@@ -67,7 +67,7 @@ public class UserController extends HttpServlet {
                     update(request, response);
                     break;
                 default:
-                    response.sendRedirect(request.getContextPath() + "/index.jsp");
+                    out.println("无效的请求");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -124,7 +124,7 @@ public class UserController extends HttpServlet {
 
             User user = new User();
             user.setUsername(username);
-            user.setPassword(MD5Utils.encrypt(password)); // 使用MD5加密密码
+            user.setPassword(password);
             user.setEmail(email);
             user.setPhone(phone);
             user.setAddress(address);

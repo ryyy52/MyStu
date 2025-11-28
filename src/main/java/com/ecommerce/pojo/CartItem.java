@@ -14,7 +14,6 @@ public class CartItem implements Serializable {
     private Integer quantity; // 商品数量
     private BigDecimal price; // 商品单价
     private Product product; // 商品信息
-    private Integer sortOrder; // 排序字段
 
     // 构造方法
     public CartItem() {
@@ -83,14 +82,6 @@ public class CartItem implements Serializable {
 
     public void setProductName(String productName) {
         this.productName = productName;
-    }
-    
-    public Integer getSortOrder() {
-        return sortOrder;
-    }
-    
-    public void setSortOrder(Integer sortOrder) {
-        this.sortOrder = sortOrder;
     }
 
     public Product getProduct() {

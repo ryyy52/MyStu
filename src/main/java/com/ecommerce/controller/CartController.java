@@ -74,7 +74,7 @@ public class CartController extends HttpServlet {
                     clearCart(request, response);
                     break;
                 default:
-                    response.sendRedirect(request.getContextPath() + "/cart/view");
+                    out.println("无效的请求");
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -11,7 +11,7 @@ import java.sql.Statement;
 public class DBInit {
     public static void main(String[] args) throws Exception {
         String hostUrl = "jdbc:mysql://localhost:3306/?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
-        String dbUrl = "jdbc:mysql://localhost:3306/ecommerce?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+        String dbUrl = "jdbc:mysql://localhost:3306/ecommerce_new?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
         String username = System.getProperty("db.user", "root");
         String password = System.getProperty("db.pass", "liuweifeng233");
 
@@ -20,7 +20,7 @@ public class DBInit {
         // 创建数据库
         try (Connection conn = DriverManager.getConnection(hostUrl, username, password);
              Statement st = conn.createStatement()) {
-            st.execute("CREATE DATABASE IF NOT EXISTS ecommerce DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+            st.execute("CREATE DATABASE IF NOT EXISTS ecommerce_new DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
         }
         
         // 检查是否需要初始化（如果product表为空或不存在唯一约束）

@@ -29,6 +29,24 @@ public class OrderDaoImpl implements OrderDao {
     
     private static final String FIND_ORDER_ITEMS_BY_ORDER_ID = "SELECT id, order_id, product_id, quantity, price FROM order_item WHERE order_id = ?";
     private static final String SAVE_ORDER_ITEM = "INSERT INTO order_item (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
+    
+    // 优化N+1查询：使用JOIN一次性查询订单和订单项
+    private static final String FIND_ORDERS_WITH_ITEMS = "SELECT o.id as order_id, o.order_no, o.user_id, o.total_amount, o.status, o.receiver_name, o.receiver_phone, o.receiver_address, o.create_time, o.update_time, " +
+            "oi.id as item_id, oi.product_id, oi.quantity, oi.price, " +
+            "p.name as product_name, p.image as product_image " +
+            "FROM `order` o " +
+            "LEFT JOIN order_item oi ON o.id = oi.order_id " +
+            "LEFT JOIN product p ON oi.product_id = p.id " +
+            "WHERE o.user_id = ? " +
+            "ORDER BY o.create_time DESC";
+    
+    private static final String FIND_ALL_ORDERS_WITH_ITEMS = "SELECT o.id as order_id, o.order_no, o.user_id, o.total_amount, o.status, o.receiver_name, o.receiver_phone, o.receiver_address, o.create_time, o.update_time, " +
+            "oi.id as item_id, oi.product_id, oi.quantity, oi.price, " +
+            "p.name as product_name, p.image as product_image " +
+            "FROM `order` o " +
+            "LEFT JOIN order_item oi ON o.id = oi.order_id " +
+            "LEFT JOIN product p ON oi.product_id = p.id " +
+            "ORDER BY o.create_time DESC";
 
     @Override
     public Order findById(Integer id) {
@@ -108,25 +126,56 @@ public class OrderDaoImpl implements OrderDao {
         List<Order> orders = new ArrayList<>();
         try {
             conn = JDBCUtils.getConnection();
-            ps = conn.prepareStatement(FIND_BY_USER_ID);
+            ps = conn.prepareStatement(FIND_ORDERS_WITH_ITEMS);
             ps.setInt(1, userId);
             rs = ps.executeQuery();
+            
+            // 使用Map缓存订单对象，避免重复创建
+            java.util.Map<Integer, Order> orderMap = new java.util.HashMap<>();
+            
             while (rs.next()) {
-                Order order = new Order();
-                order.setId(rs.getInt("id"));
-                order.setOrderNo(rs.getString("order_no"));
-                order.setUserId(rs.getInt("user_id"));
-                order.setTotalPrice(rs.getBigDecimal("total_amount"));
-                order.setStatus(rs.getInt("status"));
-                order.setReceiverName(rs.getString("receiver_name"));
-                order.setReceiverPhone(rs.getString("receiver_phone"));
-                order.setReceiverAddress(rs.getString("receiver_address"));
-                order.setCreateTime(rs.getTimestamp("create_time"));
-                order.setUpdateTime(rs.getTimestamp("update_time"));
-                // 加载订单商品项
-                List<OrderItem> orderItems = findOrderItemsByOrderId(order.getId());
-                order.setOrderItems(orderItems);
-                orders.add(order);
+                int orderId = rs.getInt("order_id");
+                Order order = orderMap.get(orderId);
+                
+                // 如果订单不存在，创建新订单对象
+                if (order == null) {
+                    order = new Order();
+                    order.setId(orderId);
+                    order.setOrderNo(rs.getString("order_no"));
+                    order.setUserId(rs.getInt("user_id"));
+                    order.setTotalPrice(rs.getBigDecimal("total_amount"));
+                    order.setStatus(rs.getInt("status"));
+                    order.setReceiverName(rs.getString("receiver_name"));
+                    order.setReceiverPhone(rs.getString("receiver_phone"));
+                    order.setReceiverAddress(rs.getString("receiver_address"));
+                    order.setCreateTime(rs.getTimestamp("create_time"));
+                    order.setUpdateTime(rs.getTimestamp("update_time"));
+                    order.setOrderItems(new ArrayList<>());
+                    orderMap.put(orderId, order);
+                    orders.add(order);
+                }
+                
+                // 获取订单项数据
+                int itemId = rs.getInt("item_id");
+                // 如果有订单项数据（LEFT JOIN可能返回null）
+                if (!rs.wasNull()) {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setId(itemId);
+                    orderItem.setOrderId(orderId);
+                    orderItem.setProductId(rs.getInt("product_id"));
+                    orderItem.setQuantity(rs.getInt("quantity"));
+                    orderItem.setPrice(rs.getBigDecimal("price"));
+                    
+                    // 创建商品对象
+                    Product product = new Product();
+                    product.setId(rs.getInt("product_id"));
+                    product.setName(rs.getString("product_name"));
+                    product.setImage(rs.getString("product_image"));
+                    orderItem.setProduct(product);
+                    
+                    // 添加到订单的订单项列表
+                    order.getOrderItems().add(orderItem);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -144,24 +193,55 @@ public class OrderDaoImpl implements OrderDao {
         List<Order> orders = new ArrayList<>();
         try {
             conn = JDBCUtils.getConnection();
-            ps = conn.prepareStatement(FIND_ALL);
+            ps = conn.prepareStatement(FIND_ALL_ORDERS_WITH_ITEMS);
             rs = ps.executeQuery();
+            
+            // 使用Map缓存订单对象，避免重复创建
+            java.util.Map<Integer, Order> orderMap = new java.util.HashMap<>();
+            
             while (rs.next()) {
-                Order order = new Order();
-                order.setId(rs.getInt("id"));
-                order.setOrderNo(rs.getString("order_no"));
-                order.setUserId(rs.getInt("user_id"));
-                order.setTotalPrice(rs.getBigDecimal("total_amount"));
-                order.setStatus(rs.getInt("status"));
-                order.setReceiverName(rs.getString("receiver_name"));
-                order.setReceiverPhone(rs.getString("receiver_phone"));
-                order.setReceiverAddress(rs.getString("receiver_address"));
-                order.setCreateTime(rs.getTimestamp("create_time"));
-                order.setUpdateTime(rs.getTimestamp("update_time"));
-                // 加载订单商品项
-                List<OrderItem> orderItems = findOrderItemsByOrderId(order.getId());
-                order.setOrderItems(orderItems);
-                orders.add(order);
+                int orderId = rs.getInt("order_id");
+                Order order = orderMap.get(orderId);
+                
+                // 如果订单不存在，创建新订单对象
+                if (order == null) {
+                    order = new Order();
+                    order.setId(orderId);
+                    order.setOrderNo(rs.getString("order_no"));
+                    order.setUserId(rs.getInt("user_id"));
+                    order.setTotalPrice(rs.getBigDecimal("total_amount"));
+                    order.setStatus(rs.getInt("status"));
+                    order.setReceiverName(rs.getString("receiver_name"));
+                    order.setReceiverPhone(rs.getString("receiver_phone"));
+                    order.setReceiverAddress(rs.getString("receiver_address"));
+                    order.setCreateTime(rs.getTimestamp("create_time"));
+                    order.setUpdateTime(rs.getTimestamp("update_time"));
+                    order.setOrderItems(new ArrayList<>());
+                    orderMap.put(orderId, order);
+                    orders.add(order);
+                }
+                
+                // 获取订单项数据
+                int itemId = rs.getInt("item_id");
+                // 如果有订单项数据（LEFT JOIN可能返回null）
+                if (!rs.wasNull()) {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setId(itemId);
+                    orderItem.setOrderId(orderId);
+                    orderItem.setProductId(rs.getInt("product_id"));
+                    orderItem.setQuantity(rs.getInt("quantity"));
+                    orderItem.setPrice(rs.getBigDecimal("price"));
+                    
+                    // 创建商品对象
+                    Product product = new Product();
+                    product.setId(rs.getInt("product_id"));
+                    product.setName(rs.getString("product_name"));
+                    product.setImage(rs.getString("product_image"));
+                    orderItem.setProduct(product);
+                    
+                    // 添加到订单的订单项列表
+                    order.getOrderItems().add(orderItem);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

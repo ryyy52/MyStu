@@ -189,7 +189,7 @@
                     <div class="product-price">¥ ${product.price}</div>
                     <div class="product-stock">库存：${product.stock}</div>
                     <a href="${pageContext.request.contextPath}/product/detail?id=${product.id}" class="btn">查看详情</a>
-                    <a href="${pageContext.request.contextPath}/cart/add?productId=${product.id}&quantity=1" class="btn">加入购物车</a>
+                    <button onclick="addToCart(${product.id})" class="btn">加入购物车</button>
                     <a href="javascript:void(0)" onclick="if(confirm('确定要删除该商品吗？')) window.location.href='${pageContext.request.contextPath}/product/delete?id=${product.id}'" class="btn" style="background-color: #e74c3c;">删除商品</a>
                 </div>
             </c:forEach>
@@ -258,5 +258,26 @@
             共 ${totalCount} 件商品，第 ${currentPage}/${totalPages} 页
         </div>
     </div>
+
+    <!-- AJAX 购物车功能 -->
+    <script>
+        function addToCart(productId) {
+            fetch('${pageContext.request.contextPath}/cart/add.json?productId=' + productId + '&quantity=1', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("添加成功！");
+                } else {
+                    alert("添加失败：" + (data.message || "未知错误"));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("添加失败：网络错误");
+            });
+        }
+    </script>
 </body>
 </html>

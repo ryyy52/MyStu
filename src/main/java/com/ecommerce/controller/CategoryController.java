@@ -217,12 +217,12 @@ public class CategoryController extends HttpServlet {
         }
 
         boolean success = categoryService.save(category);
-        PrintWriter out = response.getWriter();
-
+        
+        // 使用重定向代替直接输出HTML，解决浏览器返回键问题
         if (success) {
-            out.println("分类添加成功！<a href='" + request.getContextPath() + "/category/list'>返回列表</a>");
+            response.sendRedirect(request.getContextPath() + "/category/list");
         } else {
-            out.println("分类添加失败！<a href='" + request.getContextPath() + "/addCategory.jsp'>返回添加</a>");
+            response.sendRedirect(request.getContextPath() + "/category/add?error=save_failed");
         }
     }
 
@@ -263,10 +263,12 @@ public class CategoryController extends HttpServlet {
             }
 
             boolean success = categoryService.update(category);
+            
+            // 使用重定向代替直接输出HTML，解决浏览器返回键问题
             if (success) {
-                out.println("分类更新成功！<a href='" + request.getContextPath() + "/category/list'>返回列表</a>");
+                response.sendRedirect(request.getContextPath() + "/category/list");
             } else {
-                out.println("分类更新失败！<a href='" + request.getContextPath() + "/category/edit?id=" + id + "'>返回编辑</a>");
+                response.sendRedirect(request.getContextPath() + "/category/edit?id=" + id + "&error=update_failed");
             }
         } else {
             out.println("分类不存在！<a href='list'>返回列表</a>");
@@ -316,7 +318,8 @@ public class CategoryController extends HttpServlet {
                 out.println("</body>");
                 out.println("</html>");
             } else {
-                out.println("分类不存在！<a href='" + request.getContextPath() + "/category/list'>返回列表</a>");
+                // 使用重定向代替直接输出HTML，解决浏览器返回键问题
+            response.sendRedirect(request.getContextPath() + "/category/list?error=category_not_found");
             }
         } else {
             response.getWriter().println("无效的分类ID！<a href='" + request.getContextPath() + "/category/list'>返回列表</a>");
@@ -331,12 +334,12 @@ public class CategoryController extends HttpServlet {
         Integer id = Integer.parseInt(idStr);
 
         boolean success = categoryService.delete(id);
-        PrintWriter out = response.getWriter();
-
+        
+        // 使用重定向代替直接输出HTML，解决浏览器返回键问题
         if (success) {
-            out.println("分类删除成功！<a href='" + request.getContextPath() + "/category/list'>返回列表</a>");
+            response.sendRedirect(request.getContextPath() + "/category/list");
         } else {
-            out.println("分类删除失败！可能存在子分类或关联商品。<a href='" + request.getContextPath() + "/category/list'>返回列表</a>");
+            response.sendRedirect(request.getContextPath() + "/category/list?error=delete_failed");
         }
     }
 }

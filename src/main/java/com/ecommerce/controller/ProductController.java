@@ -117,6 +117,10 @@ public class ProductController extends HttpServlet {
         if (totalPages == 0) totalPages = 1;
         if (page > totalPages) page = totalPages;
 
+        // 获取分类树数据，所有用户都可以访问
+        List<com.ecommerce.pojo.Category> categoryTree = categoryService.getCategoryTree();
+        request.setAttribute("categoryTree", categoryTree);
+        
         request.setAttribute("products", products);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
@@ -178,6 +182,10 @@ public class ProductController extends HttpServlet {
         if (totalPages == 0) totalPages = 1;
         if (page > totalPages) page = totalPages;
 
+        // 获取分类树数据，所有用户都可以访问
+        List<com.ecommerce.pojo.Category> categoryTree = categoryService.getCategoryTree();
+        request.setAttribute("categoryTree", categoryTree);
+        
         request.setAttribute("products", products);
         request.setAttribute("keyword", safeKeyword);
         request.setAttribute("currentPage", page);
@@ -335,16 +343,19 @@ public class ProductController extends HttpServlet {
             System.out.println("productService.save()返回结果: " + ok);
             
             if (ok) {
-                out.println("商品保存成功！<a href='" + request.getContextPath() + "/product/list'>返回商品列表</a>");
                 System.out.println("商品保存成功");
+                // 使用重定向代替直接输出HTML，解决浏览器返回键问题
+                response.sendRedirect(request.getContextPath() + "/product/list");
             } else {
-                out.println("商品保存失败！<a href='" + request.getContextPath() + "/product/add'>返回添加</a>");
                 System.out.println("商品保存失败");
+                // 使用重定向代替直接输出HTML，解决浏览器返回键问题
+                response.sendRedirect(request.getContextPath() + "/product/add?error=save_failed");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            out.println("商品保存失败！错误信息：" + e.getMessage() + "<br><a href='" + request.getContextPath() + "/product/add'>返回添加</a>");
             System.out.println("商品保存过程中发生异常：" + e.getMessage());
+            // 使用重定向代替直接输出HTML，解决浏览器返回键问题
+            response.sendRedirect(request.getContextPath() + "/product/add?error=exception&message=" + java.net.URLEncoder.encode(e.getMessage(), "UTF-8"));
         } finally {
             System.out.println("=== 商品保存请求处理结束 ===");
         }

@@ -125,7 +125,9 @@
     <div class="container">
         <h1>商品列表</h1>
         <div class="toolbar">
-            <a href="${pageContext.request.contextPath}/product/add" class="btn">添加商品</a>
+            <c:if test="${not empty user and user.role == 'admin'}">
+                <a href="${pageContext.request.contextPath}/product/add" class="btn">添加商品</a>
+            </c:if>
         </div>
         
         <!-- 搜索表单 -->
@@ -190,7 +192,9 @@
                     <div class="product-stock">库存：${product.stock}</div>
                     <a href="${pageContext.request.contextPath}/product/detail?id=${product.id}" class="btn">查看详情</a>
                     <button onclick="addToCart(${product.id})" class="btn">加入购物车</button>
-                    <a href="javascript:void(0)" onclick="if(confirm('确定要删除该商品吗？')) window.location.href='${pageContext.request.contextPath}/product/delete?id=${product.id}'" class="btn" style="background-color: #e74c3c;">删除商品</a>
+                    <c:if test="${not empty user and user.role == 'admin'}">
+                        <a href="javascript:void(0)" onclick="if(confirm('确定要删除该商品吗？')) window.location.href='${pageContext.request.contextPath}/product/delete?id=${product.id}'" class="btn" style="background-color: #e74c3c;">删除商品</a>
+                    </c:if>
                 </div>
             </c:forEach>
         </div>

@@ -56,7 +56,7 @@ public class DatabaseInitListener implements ServletContextListener {
                     // 读取SQL脚本文件
                     String sqlScript = readSqlScript("sql/ecommerce_init.sql");
                     // 移除脚本中的USE语句，避免切换到错误的数据库
-                    sqlScript = sqlScript.replace("USE ecommerce;", "");
+                    sqlScript = sqlScript.replace("USE ecommerce_new;", "");
                     // 执行SQL脚本
                     executeSqlScript(st, sqlScript);
                     System.out.println("数据库初始化完成");

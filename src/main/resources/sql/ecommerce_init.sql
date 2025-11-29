@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS ecommerce DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE ecommerce;
+CREATE DATABASE IF NOT EXISTS ecommerce_new DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE ecommerce_new;
 
 -- 删除所有表，确保重新创建
 SET FOREIGN_KEY_CHECKS = 0;

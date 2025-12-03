@@ -6,9 +6,9 @@
 
 ## 技术栈
 
-- 开发语言：Java 8
+- 开发语言：Java 8+
 - 框架：Servlet 4.0 + JSP 2.3 + JSTL 1.2
-- 数据库：MySQL 8.0
+- 数据库：MySQL 8.0+
 - 构建工具：Maven 3.6+
 - Web服务器：Tomcat 7.0+
 - 数据库连接池：Apache DBCP 2

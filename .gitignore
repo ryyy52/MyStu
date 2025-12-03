@@ -1,0 +1,43 @@
+# Maven 构建输出
+/target/
+
+# IDE 配置文件
+/.idea/
+/.classpath
+/.project
+/.settings/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+.cache
+
+# 环境变量文件
+.env
+.env.local
+.env.production.local
+.env.development.local
+
+# Maven 包装器文件
+/mvnw
+/mvnw.cmd
+/.mvn/wrapper/maven-wrapper.jar
+
+# 确保 src 目录不被忽略（虽然默认不会忽略，但明确声明更好）
+!/src/
+
+# 忽略测试输出但保留测试源文件
+/target/test-classes/
+/target/surefire-reports/
+
+# 忽略生成的源代码
+/target/generated-sources/
+/target/generated-test-sources/

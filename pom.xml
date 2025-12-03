@@ -1,0 +1,299 @@
+<!-- 
+  ================================================================
+  电商系统Maven配置文件 (pom.xml)
+  ================================================================
+  
+  文件作用：
+  1. 定义项目的基本信息（名称、版本、打包方式等）
+  2. 声明项目依赖的第三方库和版本
+  3. 配置Maven构建插件
+  4. 定义项目的构建流程和部署方式
+  
+  项目信息：
+  - 项目名称: ecommerce-system (电商系统)
+  - 版本: 1.0-SNAPSHOT（开发版本）
+  - 打包方式: WAR（Web应用程序存档）
+  - 架构: MVC模式（Model-View-Controller）
+  
+  核心功能：
+  1. 用户管理：注册、登录、个人信息管理
+  2. 商品管理：商品列表、分类、搜索、详情展示
+  3. 购物车：商品添加、数量修改、删除、结算
+  4. 订单处理：订单创建、列表查询、详情展示
+  5. 数据持久化：MySQL数据库连接和操作
+  
+  部署环境：
+  - 容器：Apache Tomcat 7.0 或更高版本
+  - 数据库：MySQL 5.7 或更高版本
+  - JDK：Java 8 或更高版本
+  
+  ================================================================
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    
+    <!-- ==================== POM基本信息 ==================== -->
+    <!-- Maven POM模型版本 - 遵循的Maven配置模型版本，固定为4.0.0 -->
+    <modelVersion>4.0.0</modelVersion>
+    
+    <!-- 组织/公司的唯一标识 - 通常使用反向域名加组织名 -->
+    <!-- 格式：com.公司名.部门名 -->
+    <groupId>com.ecommerce</groupId>
+    
+    <!-- 项目的唯一标识 - 同一GroupId下，ArtifactId唯一标识项目 -->
+    <!-- 通常使用项目名或应用名 -->
+    <artifactId>ecommerce-system</artifactId>
+    
+    <!-- 打包方式 - war表示Web应用程序存档格式 -->
+    <!-- 其他选项：jar（Java应用程序）、pom（多模块项目）、ear（企业应用） -->
+    <packaging>war</packaging>
+    
+    <!-- 项目版本号 -->
+    <!-- SNAPSHOT表示开发版本（不稳定）；Release表示发布版本（稳定） -->
+    <!-- 版本号命名规范：主版本.次版本.修订版本 -->
+    <version>1.0-SNAPSHOT</version>
+    
+    <!-- 项目显示名称 - 用于Maven生成的文档 -->
+    <name>ecommerce-system Maven Webapp</name>
+    
+    <!-- 项目网站URL - 用于Maven生成的文档 -->
+    <url>http://maven.apache.org</url>
+    
+    <!-- ==================== 项目依赖声明 ==================== -->
+    <dependencies>
+        
+        <!-- ========== Web框架依赖 ========== -->
+        <!-- 
+          Servlet API是Java Web开发的基础API
+          用于处理HTTP请求和响应、管理会话等
+        -->
+        <!-- Servlet API: 4.0版本对应Java EE 8规范 -->
+        <dependency>
+            <!-- 依赖的组织ID -->
+            <groupId>javax.servlet</groupId>
+            <!-- 依赖的项目ID -->
+            <artifactId>javax.servlet-api</artifactId>
+            <!-- 依赖的版本号 -->
+            <version>4.0.1</version>
+            <!-- scope作用范围说明：
+                 - compile：编译、测试和运行都需要（默认）
+                 - provided：由运行环境提供，编译时需要但不打包
+                 - runtime：只在运行时需要，编译时不需要
+                 - test：只在测试时需要
+                 这里使用provided是因为Tomcat容器会提供Servlet API -->
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- JSP API: Java Server Pages规范实现 -->
+        <!-- 用于在Java代码中使用JSP标签库 -->
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>javax.servlet.jsp-api</artifactId>
+            <version>2.3.3</version>
+            <!-- JSP API也由Tomcat容器提供，所以使用provided -->
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- JSTL (Java Server Pages Standard Tag Library) -->
+        <!-- JSP标准标签库，提供条件判断、循环、字符串处理等标签 -->
+        <!-- 使用JSTL可以减少JSP页面中的Java代码量 -->
+        <!-- 例如：<c:if>, <c:forEach>, <fmt:formatDate>等标签 -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+            <!-- 使用compile（默认）因为需要打包到WAR中 -->
+        </dependency>
+        
+        <!-- ========== 数据库连接依赖 ========== -->
+        <!-- 
+          MySQL JDBC驱动是Java程序连接MySQL数据库的必要库
+          用于执行SQL语句、获取查询结果等
+        -->
+        <!-- MySQL JDBC驱动程序 - MySQL官方提供 -->
+        <!-- 版本8.0.28对应MySQL 5.7及以上版本 -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.28</version>
+        </dependency>
+        
+        <!-- ========== 数据库连接池和工具库 ========== -->
+        <!-- 
+          这三个库共同组成了应用的数据持久化层
+          1. commons-dbutils：简化JDBC操作
+          2. commons-pool2：对象池管理
+          3. commons-dbcp2：基于pool的连接池实现
+        -->
+        
+        <!-- Apache Commons DBUtils -->
+        <!-- 数据库操作工具库，简化JDBC编程 -->
+        <!-- 主要功能：
+             1. 自动处理ResultSet到对象的映射（QueryRunner）
+             2. 简化参数设置和结果集处理
+             3. 减少try-catch代码量
+             4. 提供批量操作支持
+        -->
+        <dependency>
+            <groupId>commons-dbutils</groupId>
+            <artifactId>commons-dbutils</artifactId>
+            <version>1.7</version>
+        </dependency>
+        
+        <!-- Apache Commons Pool -->
+        <!-- 通用对象池实现库 -->
+        <!-- 主要功能：
+             1. 提供对象池的基础实现
+             2. 自动管理对象的创建和销毁
+             3. 提高资源利用率
+             4. 支持对象的重用
+             应用：配合commons-dbcp2实现数据库连接池
+        -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>2.11.1</version>
+        </dependency>
+        
+        <!-- Apache Commons DBCP -->
+        <!-- 数据源和数据库连接池实现库 -->
+        <!-- 主要功能：
+             1. 实现数据库连接池（基于commons-pool2）
+             2. 管理数据库连接的创建、复用和销毁
+             3. 提高数据库连接性能和并发能力
+             4. 支持连接超时、空闲连接回收等功能
+             作用：当应用需要数据库连接时，从池中获取；用完后归还池中复用
+        -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-dbcp2</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+        
+        <!-- ========== JSON处理依赖 ========== -->
+        <!-- 
+          JSON序列化库用于对象与JSON格式的转换
+          在REST API开发中广泛使用
+        -->
+        <!-- Alibaba FastJSON - 高性能JSON处理库 -->
+        <!-- 主要功能：
+             1. Java对象与JSON字符串的相互转换
+             2. 支持泛型、嵌套对象的序列化
+             3. 性能优于原生JSON库
+             4. 提供灵活的定制选项
+             应用场景：
+             - 返回JSON API响应
+             - 解析JSON请求参数
+             - 数据序列化存储
+        -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.83</version>
+        </dependency>
+    </dependencies>
+    
+    <!-- ==================== 构建配置 ==================== -->
+    <!-- 
+      构建配置定义了项目如何编译、打包、部署等
+    -->
+    <build>
+        <!-- 最终生成的WAR包名称（不包含.war扩展名） -->
+        <!-- 部署后会生成：target/ecommerce-system.war -->
+        <finalName>ecommerce-system</finalName>
+        
+        <!-- Maven插件配置 -->
+        <!-- 插件是Maven的功能扩展，用于执行特定的构建任务 -->
+        <plugins>
+            
+            <!-- ========== Java编译插件 ========== -->
+            <!-- 
+              maven-compiler-plugin负责编译Java源代码
+              配置编译选项、Java版本等
+            -->
+            <plugin>
+                <!-- 插件的组织ID -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <!-- 插件的项目ID -->
+                <artifactId>maven-compiler-plugin</artifactId>
+                <!-- 插件的版本号 -->
+                <version>3.8.1</version>
+                <!-- 插件的具体配置 -->
+                <configuration>
+                    <!-- 源代码的Java版本 - 1.8表示Java 8语法 -->
+                    <!-- 源代码使用的Java语言特性版本 -->
+                    <source>1.8</source>
+                    <!-- 编译目标的Java版本 - 生成的字节码适配Java 8 -->
+                    <!-- 编译后的.class文件适配的JVM版本 -->
+                    <target>1.8</target>
+                    <!-- 源文件的字符编码 - UTF-8支持中文 -->
+                    <!-- 重要：必须设为UTF-8，否则中文注释和字符串会乱码 -->
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            
+            <!-- ========== WAR打包插件 ========== -->
+            <!-- 
+              maven-war-plugin负责构建和打包WAR文件
+              WAR（Web应用程序存档）是Web应用的标准打包格式
+              包含Java类文件、JSP页面、静态资源等
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.3.2</version>
+                <configuration>
+                    <!-- WAR文件在构建时的输出目录 -->
+                    <!-- 默认为 target/项目名 -->
+                    <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
+                    <!-- Web应用的源文件目录 -->
+                    <!-- 通常包含JSP页面、静态资源等 -->
+                    <warSourceDirectory>src/main/webapp</warSourceDirectory>
+                </configuration>
+            </plugin>
+            
+            <!-- ========== Tomcat部署插件 ========== -->
+            <!-- 
+              tomcat7-maven-plugin用于快速部署应用到Tomcat
+              支持自动编译、打包、部署的一键操作
+              
+              使用命令：
+              - mvn tomcat7:deploy：首次部署
+              - mvn tomcat7:redeploy：重新部署（覆盖已有）
+              
+              前置条件：
+              1. Tomcat必须已启动
+              2. 在Tomcat的conf/tomcat-users.xml中配置了admin用户
+              3. 配置了Tomcat管理器（manager）应用
+              
+              示例配置(在Tomcat的tomcat-users.xml中)：
+              <user username="admin" password="admin" 
+                    roles="manager-gui,manager-text,manager-script"/>
+            -->
+            <plugin>
+                <!-- 这是第三方插件，不是Maven官方提供的 -->
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <!-- Tomcat管理器API的URL地址 -->
+                    <!-- manager/text表示使用文本接口（JSON/XML格式响应） -->
+                    <!-- 如果Tomcat运行在其他机器或端口，修改此URL -->
+                    <url>http://localhost:8080/manager/text</url>
+                    <!-- Tomcat管理员用户名 -->
+                    <!-- 必须与tomcat-users.xml中配置的用户名一致 -->
+                    <username>admin</username>
+                    <!-- Tomcat管理员密码 -->
+                    <!-- 必须与tomcat-users.xml中配置的密码一致 -->
+                    <password>admin</password>
+                    <!-- 应用程序在Tomcat中的部署路径 -->
+                    <!-- 部署后访问URL为：http://localhost:8080/ecommerce-system -->
+                    <path>/ecommerce-system</path>
+                    <!-- 是否在部署时更新已存在的应用 -->
+                    <!-- true：覆盖已有的应用；false：如果存在则不部署 -->
+                    <update>true</update>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
